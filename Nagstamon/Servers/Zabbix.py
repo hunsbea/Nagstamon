@@ -510,7 +510,11 @@ class ZabbixServer(GenericServer):
                     actions |= 4
                 if conf.debug_mode is True:
                     self.Debug(server=self.get_name(), debug="Events to acknowledge: " + str(events) + " Close: " + str(actions))
-                self.zapi.event.acknowledge({'eventids': events, 'message': comment, 'action': actions})
+                try:
+                    self.zapi.event.acknowledge({'eventids': events, 'message': comment, 'action': actions})
+                # Most likely you tried to close an event which cannot be closed manually
+                except ZabbixAPIException as ex:
+                    self.Debug(server=self.get_name(), debug=str(ex))
 
     def _set_downtime(self, hostname, service, author, comment, fixed, start_time, end_time, hours, minutes):
 
